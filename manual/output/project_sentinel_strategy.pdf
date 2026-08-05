@@ -1,4 +1,5 @@
 %PDF-1.4
+%????
 1 0 obj
 << /Type /Catalog /Pages 2 0 R >>
 endobj
@@ -9,12 +10,18 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
 endobj
 4 0 obj
-<< /Length 220 >>
+<< /Length 83 >>
 stream
-BT /F1 18 Tf 72 720 Td (Project Sentinel Strategy) Tj ET
-BT /F1 12 Tf 72 690 Td (This strategy document captures the proposed approach for managing the Siemens assessment workflow and its supporting documentation artifacts.) Tj ET
-BT /F1 12 Tf 72 660 Td (It highlights the role of source grounding, controlled terminology, validation checkpoints, and reviewer sign-off before publication.) Tj ET
-BT /F1 12 Tf 72 630 Td (The document complements the policy overview by describing the operational steps and governance expectations for future work.) Tj ET
+BT
+/F1 18 Tf
+72 720 Td
+(Project Sentinel Strategy) Tj
+ET
+BT
+/F1 12 Tf
+72 690 Td
+(This strategy document captures the proposed approach for managing the Siemens assessment workflow and its supporting documentation artifacts.) Tj
+ET
 endstream
 endobj
 5 0 obj
