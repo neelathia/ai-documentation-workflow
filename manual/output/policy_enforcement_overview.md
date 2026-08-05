@@ -1,165 +1,209 @@
 # Policy enforcement in Cloud Deployer Pro
 
-## Overview
-
-Cloud Deployer Pro Advanced Multi-Cloud Orchestration now supports policy enforcement in deployment pipelines.
-
-Policy enforcement helps teams apply security and compliance requirements consistently across connected cloud and on-premises environments. It can:
-
-- block noncompliant deployments;
-- apply different enforcement behavior in development, staging, and production;
-- enforce required resource tags;
-- compare the desired resource state with the existing state; and
-- detect changes made outside the deployment pipeline.
-
-The policy engine uses a simplified YAML policy definition that compiles to Rego and runs through Open Policy Agent. Automatic remediation remains experimental for some resource types.
-
-## Intended audience
-
-This overview is intended for experienced developers who configure Cloud Deployer Pro deployment pipelines and are familiar with YAML, cloud APIs, and resource models.
+> **Internal documentation note**
+>
+> Content marked as an internal documentation note is intended for authors and reviewers only. Remove these notes before publication.
 
 ## About this guide
 
-This page is the parent overview for the policy-enforcement feature. It explains the feature, its lifecycle, the artifacts involved, and the relationship between policy definition, deployment enforcement, and drift detection.
+This guide serves as the parent document for the policy-enforcement feature in Cloud Deployer Pro. It introduces the feature, explains why it matters, summarizes how policy enforcement fits into the deployment lifecycle, and directs readers to the detailed execution guides that contain the step-by-step procedures.
 
-Detailed execution guides will be published after the documentation team can:
+Use this guide to understand:
 
-- access the feature in Cloud Deployer Pro;
-- perform each workflow from beginning to end;
-- verify the complete UI navigation and field names;
-- confirm the YAML schemas and supported values;
-- validate CLI commands and outputs;
-- test permissions, role assumption, and failure behavior; and
-- review the procedures with engineering and security subject-matter experts.
+- the purpose of policy enforcement;
+- the configuration artifacts involved;
+- the high-level pre-deployment, deployment, and post-deployment activities;
+- the available enforcement responses; and
+- the related detailed guides for completing each task.
 
-## Policy enforcement in the deployment lifecycle
+> **Internal documentation note — remove before publication**
+>
+> This draft is based on engineering email inputs. Before publication, the technical writer must:
+>
+> - access the feature in Cloud Deployer Pro;
+> - validate the documented workflows and steps;
+> - resolve the identified clarification items with engineering and security subject-matter experts; and
+> - finalize this overview and the related detailed execution guides.
 
-Policy enforcement applies across three phases.
+## Overview
 
-### Pre-deployment
+Cloud Deployer Pro policy enforcement adds automated governance checks to the deployment lifecycle. The feature evaluates deployment resources against defined policy requirements before and during deployment, and it can continue monitoring deployed resources for drift afterward.
 
-Before deployment:
+Policy enforcement supports teams by helping them:
 
-1. Define policy constraints and violation responses in *policy-manifest.yaml*.
-2. Add `conditions` blocks when a policy applies only to a specific environment or application type.
-3. Define required tags, such as Owner, CostCenter, and Environment.
-4. Compose modular policy files into *policy-set.yaml* when several policy domains apply.
-5. Reference the policy manifest or policy set from the top-level `policies` block in *pipeline.yml*.
-6. Specify applicable stages and configure stage-specific overrides.
-7. Run `cdp policy validate`.
+- apply governance rules consistently across environments;
+- identify noncompliant configurations before or during deployment;
+- separate policy-evaluation permissions from deployment permissions; and
+- detect post-deployment drift from the approved state.
 
-### Deployment
+The policy engine uses a simplified YAML policy definition that compiles to Rego and runs through Open Policy Agent.
 
-During deployment:
+Depending on the configured violation response, the policy engine can:
 
-1. Run `cdp pipeline run --policy-check`.
-2. Compare the desired resource state with the existing state.
-3. Apply the configured response when a constraint is violated:
-   - deny the deployment;
-   - warn and log; or
-   - automatically remediate the resource when supported.
-4. Review verbose violation information and Rego traces when troubleshooting a custom policy.
+- deny a deployment;
+- issue a warning and log the violation; or
+- attempt automatic remediation.
 
-### Post-deployment
+Automatic remediation remains experimental for some resource types.
 
-After deployment:
+## How policy enforcement works
 
-1. Monitor deployed resources for changes made outside the pipeline.
-2. Run `cdp policy detect-drift --pipeline <id>` for on-demand drift detection.
-3. Send drift alerts through webhooks or SNS/SQS integrations.
-4. Restore the declared state manually or rerun the pipeline.
-5. Keep changes flowing through the deployment pipeline to support the immutability principle.
+```mermaid
+flowchart LR
+    A[Configure policy-engine identity] --> B[Define policies in policy-manifest.yaml]
+    B --> C[Compose policy-set.yaml when needed]
+    C --> D[Reference policies in pipeline.yml]
+    D --> E[Validate policy definition]
+    E --> F[Run deployment with policy check]
+    F --> G[Policy engine evaluates resource state]
+    G --> H{Violation detected?}
+    H -- No --> I[Continue deployment]
+    H -- Yes --> J[Deny deployment]
+    H -- Yes --> K[Warn and log]
+    H -- Yes --> L[Attempt automatic remediation]
+    I --> M[Monitor deployed resources for drift]
+    J --> M
+    K --> M
+    L --> M
+    M --> N[Restore approved state or rerun pipeline]
+```
+
+The policy-enforcement flow begins with identity and policy configuration, continues through deployment-time evaluation, and extends into post-deployment drift detection.
 
 ## Core configuration artifacts
 
-### *policy-manifest.yaml*
+Cloud Deployer Pro uses the following files to define and apply deployment policies:
 
-Defines desired state, policy constraints, violation responses, optional conditions, and required tag rules.
+- *policy-manifest.yaml* defines policy constraints, conditions, required tags, and violation responses.
+- *policy-set.yaml* composes several modular policy files into a reusable policy set.
+- *pipeline.yml* associates the policy manifest or policy set with a deployment pipeline through the top-level `policies` block.
 
-Example policy intents include:
+A policy manifest remains separate from *pipeline.yml*, but *pipeline.yml* references the applicable policy definition.
 
-- require approved KMS encryption for Amazon S3 buckets;
-- prevent public ingress to databases;
-- require Owner, CostCenter, and Environment tags; and
-- limit resource sizes by environment.
+## Deployment lifecycle and policy enforcement
 
-### *policy-set.yaml*
+### Pre-deployment
 
-Combines modular policy files, such as security, compliance, and cost policies, into one reusable policy set.
+Complete the following high-level tasks before starting a deployment.
 
-### *pipeline.yml*
+1. Configure the policy-engine identity.
 
-References the policy manifest or policy set from a top-level `policies` block. It identifies applicable stages and can define stage-specific overrides.
+   Configure a separate, granular, read-only IAM role or service account for policy evaluation.
 
-For example, development can warn about selected violations while production denies the same violations.
+   In Cloud Deployer Pro, the source identifies the configuration location as:
 
-## Policy-engine identity
+   **Settings > Cloud Integrations > Policy Engine IAM Role**
 
-Policy evaluation uses a separate, granular, read-only IAM role or service account.
+   The policy-engine identity:
 
-The source identifies the configuration location as:
+   - can support cross-account or cross-cloud role assumption;
+   - must remain separate from the deployment identity; and
+   - requires only the permissions needed to evaluate existing resource state.
 
-**Settings > Cloud Integrations > Policy Engine IAM Role**
+   See *Configure the policy-engine identity* for detailed instructions.
 
-The policy-engine identity:
+2. Define policy constraints and violation responses in *policy-manifest.yaml*.
 
-- can support cross-account or cross-cloud role assumption;
-- must remain separate from the deployment identity; and
-- requires only the access needed to evaluate existing resource state.
+   See *Create and validate a policy manifest* for detailed instructions.
 
-The complete configuration procedure depends on product access and confirmation of provider-specific permissions, fields, and role-assumption behavior.
+3. Add `conditions` blocks when a policy applies only to a specific environment or application type.
 
-## Enforcement responses
+   See *Define policy constraints, conditions, and required tags* for detailed instructions.
 
-| Response | Behavior |
-| --- | --- |
-| Deny | Blocks the deployment when a constraint is violated. |
-| Warn and log | Allows the deployment to continue and records the violation. |
-| Automatically remediate | Attempts to correct a supported resource. This response remains experimental for some resource types. |
+4. Define required tags, such as `Owner`, `CostCenter`, and `Environment`.
 
-## Drift detection and immutability
+   See *Define policy constraints, conditions, and required tags* for detailed instructions.
 
-The policy engine continues monitoring deployed resources after deployment. It identifies changes made outside the deployment pipeline and can notify operational teams through webhooks or SNS/SQS.
+5. Compose modular policy files into *policy-set.yaml* when several policy domains apply.
 
-Teams can restore the declared state manually or rerun the pipeline. Routing changes through the pipeline keeps the declared and deployed states aligned and supports the immutability principle.
+   See *Compose modular policies into a policy set* for detailed instructions.
 
-## Related detailed guides
+6. Reference the policy manifest or policy set from the top-level `policies` block in *pipeline.yml*.
 
-### Pre-deployment guides
+   See *Associate policies with a deployment pipeline* for detailed instructions.
 
-- **Create and validate a policy manifest** - Coming soon
-- **Define constraints, conditions, and required tags** - Coming soon
-- **Compose modular policies in a policy set** - Coming soon
-- **Reference policies in a deployment pipeline** - Coming soon
-- **Configure stage-specific policy behavior** - Coming soon
-- **Configure the policy-engine identity** - Coming soon
+7. Specify the applicable stages and configure stage-specific overrides for development, staging, or production.
 
-### Deployment guides
+   See *Configure policy enforcement by deployment stage* for detailed instructions.
 
-- **Run a pipeline with policy checks** - Coming soon
-- **Review and resolve policy violations** - Coming soon
-- **Interpret custom-policy Rego traces** - Coming soon
-- **Use policy enforcement responses** - Coming soon
+8. Run `cdp policy validate` to validate the policy definition before deployment.
 
-### Post-deployment guides
+   See *Create and validate a policy manifest* for detailed instructions.
 
-- **Run on-demand drift detection** - Coming soon
-- **Configure webhook or SNS/SQS drift alerts** - Coming soon
-- **Review and resolve configuration drift** - Coming soon
+### Deployment
 
-> **Publication note:** Detailed guides will be completed after the workflows can be performed and verified in the product environment. Each guide will include confirmed prerequisites, complete navigation, exact configuration fields, validated commands, expected results, common errors, and SME-reviewed recovery guidance.
+During deployment, Cloud Deployer Pro evaluates the applicable policies against the current resource state.
+
+Run the deployment with policy checks enabled:
+
+```bash
+cdp pipeline run --policy-check
+```
+
+When the policy engine detects a violation, it applies the response defined in the policy configuration.
+
+#### Enforcement responses
+
+The policy engine can:
+
+- deny the deployment;
+- issue a warning and log the violation; or
+- attempt automatic remediation for supported resource types.
+
+Automatic remediation remains experimental for some resource types.
+
+Verbose output can include violation details and Rego evaluation traces. Use this information to identify the policy, constraint, or resource state that caused the evaluation result.
+
+See *Run a deployment with policy checks* and *Troubleshoot policy violations* for detailed instructions.
+
+### Post-deployment
+
+After deployment, drift detection compares the deployed resource state with the approved policy state.
+
+Cloud Deployer Pro can receive drift events through supported integrations, including webhooks, Amazon SNS, and Amazon SQS.
+
+Run manual drift detection for a pipeline:
+
+```bash
+cdp policy detect-drift --pipeline <id>
+```
+
+When Cloud Deployer Pro detects drift, restore the approved state or rerun the pipeline.
+
+#### Drift detection and immutability
+
+Policy immutability helps preserve the policy version used to evaluate and approve a deployment. This supports consistent evaluation and provides a stable reference when investigating post-deployment drift.
+
+See *Detect and resolve policy drift* for detailed instructions.
+
+## Detailed execution guides
+
+The following guides provide the detailed procedures referenced in this overview:
+
+- *Configure the policy-engine identity*
+- *Create and validate a policy manifest*
+- *Define policy constraints, conditions, and required tags*
+- *Compose modular policies into a policy set*
+- *Associate policies with a deployment pipeline*
+- *Configure policy enforcement by deployment stage*
+- *Run a deployment with policy checks*
+- *Troubleshoot policy violations*
+- *Detect and resolve policy drift*
 
 ## Questions for Lena
 
-1. Can you provide the supported schemas and an approved example for *policy-manifest.yaml* and *policy-set.yaml*?
-2. What is the exact syntax of the top-level `policies` block in *pipeline.yml*?
-3. How are stages, stage-specific responses, and policy parameters configured?
-4. What is the complete navigation and configuration workflow for **Policy Engine IAM Role**?
-5. What minimum permissions does the policy-engine identity require for each supported cloud provider?
-6. How is cross-account or cross-cloud role assumption configured and validated?
-7. What is the correct spelling and complete syntax of the command shown as `cdp policy enforc`?
-8. Which resource types support automatic remediation, and what happens when remediation fails?
-9. What fields appear in policy violations, validation output, and Rego traces?
-10. How are webhook and SNS/SQS drift alerts configured?
-11. How frequently does continuous drift detection run?
-12. What indicates that drift has been resolved successfully?
+1. What exact YAML schema and supported values apply to *policy-manifest.yaml*?
+2. What exact YAML schema applies to *policy-set.yaml*?
+3. What syntax does the top-level `policies` block use in *pipeline.yml*?
+4. Which policy types support automatic remediation?
+5. What limitations apply to automatic remediation?
+6. What exact UI fields appear under **Settings > Cloud Integrations > Policy Engine IAM Role**?
+7. Which provider-specific permissions are required for the read-only policy-engine identity?
+8. How does cross-account or cross-cloud role assumption work?
+9. Which failure messages appear when role assumption or policy evaluation fails?
+10. What output does `cdp policy validate` return for successful and failed validation?
+11. What output does `cdp pipeline run --policy-check` return for deny, warn, and auto-remediate responses?
+12. Is `cdp policy enforc` an incomplete or mistyped command?
+13. Which webhook, Amazon SNS, and Amazon SQS configurations are supported for drift events?
+14. How are immutable policy versions stored, identified, and retrieved?
+15. Which tasks require administrator, security, or developer permissions?
