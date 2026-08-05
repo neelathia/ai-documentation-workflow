@@ -86,15 +86,15 @@ A policy manifest remains separate from *pipeline.yml*, but *pipeline.yml* refer
 
 Complete the following high-level tasks before starting a deployment.
 
-1. Configure the policy-engine identity.
+#### 1. Configure the policy-engine identity
 
-   Configure a separate, granular, read-only IAM role or service account for policy evaluation.
+Configure a separate, granular, read-only IAM role or service account for policy evaluation.
 
-   In Cloud Deployer Pro, the source identifies the configuration location as:
+In Cloud Deployer Pro, the source identifies the configuration location as:
 
-   **Settings > Cloud Integrations > Policy Engine IAM Role**
+**Settings > Cloud Integrations > Policy Engine IAM Role**
 
-   The policy-engine identity:
+The policy-engine identity:
 
    - can support cross-account or cross-cloud role assumption;
    - must remain separate from the deployment identity; and
@@ -102,33 +102,33 @@ Complete the following high-level tasks before starting a deployment.
 
    See *Configure the policy-engine identity* for detailed instructions.
 
-2. Define policy constraints and violation responses in *policy-manifest.yaml*.
+#### 2. Define policy constraints and violation responses in *policy-manifest.yaml*
 
-   See *Create and validate a policy manifest* for detailed instructions.
+See *Create and validate a policy manifest* for detailed instructions.
 
-3. Add `conditions` blocks when a policy applies only to a specific environment or application type.
+#### 3. Add `conditions` blocks when a policy applies only to a specific environment or application type
 
-   See *Define policy constraints, conditions, and required tags* for detailed instructions.
+See *Define policy constraints, conditions, and required tags* for detailed instructions.
 
-4. Define required tags, such as `Owner`, `CostCenter`, and `Environment`.
+#### 4. Define required tags, such as `Owner`, `CostCenter`, and `Environment`
 
-   See *Define policy constraints, conditions, and required tags* for detailed instructions.
+See *Define policy constraints, conditions, and required tags* for detailed instructions.
 
-5. Compose modular policy files into *policy-set.yaml* when several policy domains apply.
+#### 5. Compose modular policy files into *policy-set.yaml* when several policy domains apply
 
-   See *Compose modular policies into a policy set* for detailed instructions.
+See *Compose modular policies into a policy set* for detailed instructions.
 
-6. Reference the policy manifest or policy set from the top-level `policies` block in *pipeline.yml*.
+#### 6. Reference the policy manifest or policy set from the top-level `policies` block in *pipeline.yml*
 
-   See *Associate policies with a deployment pipeline* for detailed instructions.
+See *Associate policies with a deployment pipeline* for detailed instructions.
 
-7. Specify the applicable stages and configure stage-specific overrides for development, staging, or production.
+#### 7. Specify the applicable stages and configure stage-specific overrides for development, staging, or production
 
-   See *Configure policy enforcement by deployment stage* for detailed instructions.
+See *Configure policy enforcement by deployment stage* for detailed instructions.
 
-8. Run `cdp policy validate` to validate the policy definition before deployment.
+#### 8. Run `cdp policy validate` to validate the policy definition before deployment
 
-   See *Create and validate a policy manifest* for detailed instructions.
+See *Create and validate a policy manifest* for detailed instructions.
 
 ### Deployment
 
@@ -192,18 +192,18 @@ The following guides provide the detailed procedures referenced in this overview
 
 ## Questions for Lena
 
-1. What exact YAML schema and supported values apply to *policy-manifest.yaml*?
-2. What exact YAML schema applies to *policy-set.yaml*?
-3. What syntax does the top-level `policies` block use in *pipeline.yml*?
-4. Which policy types support automatic remediation?
-5. What limitations apply to automatic remediation?
-6. What exact UI fields appear under **Settings > Cloud Integrations > Policy Engine IAM Role**?
-7. Which provider-specific permissions are required for the read-only policy-engine identity?
-8. How does cross-account or cross-cloud role assumption work?
-9. Which failure messages appear when role assumption or policy evaluation fails?
-10. What output does `cdp policy validate` return for successful and failed validation?
-11. What output does `cdp pipeline run --policy-check` return for deny, warn, and auto-remediate responses?
-12. Is `cdp policy enforc` an incomplete or mistyped command?
-13. Which webhook, Amazon SNS, and Amazon SQS configurations are supported for drift events?
-14. How are immutable policy versions stored, identified, and retrieved?
-15. Which tasks require administrator, security, or developer permissions?
+#### 1. What exact YAML schema and supported values apply to *policy-manifest.yaml*?
+#### 2. What exact YAML schema applies to *policy-set.yaml*?
+#### 3. What syntax does the top-level `policies` block use in *pipeline.yml*?
+#### 4. Which policy types support automatic remediation?
+#### 5. What limitations apply to automatic remediation?
+#### 6. What exact UI fields appear under **Settings > Cloud Integrations > Policy Engine IAM Role**?
+#### 7. Which provider-specific permissions are required for the read-only policy-engine identity?
+#### 8. How does cross-account or cross-cloud role assumption work?
+#### 9. Which failure messages appear when role assumption or policy evaluation fails?
+#### 10. What output does `cdp policy validate` return for successful and failed validation?
+#### 11. What output does `cdp pipeline run --policy-check` return for deny, warn, and auto-remediate responses?
+#### 12. Is `cdp policy enforc` an incomplete or mistyped command?
+#### 13. Which webhook, Amazon SNS, and Amazon SQS configurations are supported for drift events?
+#### 14. How are immutable policy versions stored, identified, and retrieved?
+#### 15. Which tasks require administrator, security, or developer permissions?
