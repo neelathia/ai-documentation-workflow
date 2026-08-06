@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project Sentinel Help Center</title>
+<style>
+:root{--navy:#0B1120;--bg:#F1F5F9;--card:#fff;--border:#E2E8F0;--text:#0F172A;--muted:#64748B;--cyan:#0891B2}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px Segoe UI,system-ui,sans-serif}
+header{background:var(--navy);color:#fff;padding:26px 30px}header h1{margin:0 0 5px}header p{margin:0;color:#CBD5E1}
+main{max-width:1120px;margin:auto;padding:28px}.search{width:100%;padding:13px 15px;border:1px solid var(--border);border-radius:10px;font-size:15px;margin-bottom:22px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px}.card h2{font-size:16px;margin:0 0 8px}.card p{color:var(--muted);margin:0 0 12px}.card ul{padding-left:18px;margin:0}.card li{margin:7px 0}.tag{font-size:11px;background:#ECFEFF;color:#155E75;border:1px solid #A5F3FC;border-radius:20px;padding:3px 8px;display:inline-block;margin-bottom:10px}
+.section{margin-top:28px}.section h2{font-size:19px}.paths{display:grid;grid-template-columns:1fr 1fr;gap:16px}.role{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px}.role h3{margin:0 0 8px;font-size:15px}
+a{color:#0E7490;text-decoration:none}a:hover{text-decoration:underline}.note{background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:11px 13px;margin-top:24px;color:#92400E}
+@media(max-width:850px){.grid{grid-template-columns:1fr 1fr}.paths{grid-template-columns:1fr}}@media(max-width:560px){.grid{grid-template-columns:1fr}main{padding:20px}}
+</style>
+</head>
+<body>
+<header><h1>Project Sentinel Help</h1><p>Find guidance by task, role, or product area.</p></header>
+<main>
+<input class="search" id="search" placeholder="Search help topics" aria-label="Search help topics">
+
+<div class="grid" id="topicGrid">
+  <article class="card topic" data-keywords="get started interface navigation health states roles first service">
+    <span class="tag">Get started</span><h2>Start using Project Sentinel</h2>
+    <p>Learn the product model, interface, health states, roles, and first-time setup.</p>
+    <ul><li><a href="../docs/concepts/understand-the-interface.md">Understand the interface</a></li><li><a href="../docs/tasks/add-a-microservice-to-monitoring.md">Set up your first service</a></li></ul>
+  </article>
+  <article class="card topic" data-keywords="monitor investigate dashboard service health dependencies performance">
+    <span class="tag">Monitor</span><h2>Monitor and investigate</h2>
+    <p>Review portfolio health, open a service, and investigate performance issues.</p>
+    <ul><li>View portfolio health</li><li>Investigate a degraded service</li><li>Review dependencies</li></ul>
+  </article>
+  <article class="card topic" data-keywords="configure service add telemetry owner environment threshold connection">
+    <span class="tag">Configure services</span><h2>Configure monitoring</h2>
+    <p>Add services, connect telemetry, define thresholds, and validate data.</p>
+    <ul><li><a href="../docs/tasks/add-a-microservice-to-monitoring.md">Add a microservice</a></li><li>Test monitoring connectivity</li></ul>
+  </article>
+  <article class="card topic" data-keywords="alerts rules threshold evaluation severity notification pagerduty teams email">
+    <span class="tag">Alerts</span><h2>Configure alerts</h2>
+    <p>Define alert conditions, severity, notification routing, and testing.</p>
+    <ul><li>Create an alert rule</li><li>Tune noisy alerts</li></ul>
+  </article>
+  <article class="card topic" data-keywords="integrations jira teams pagerduty webhook logging telemetry">
+    <span class="tag">Integrations</span><h2>Configure integrations</h2>
+    <p>Connect logging, collaboration, incident, and automation systems.</p>
+    <ul><li>Connect Jira</li><li>Connect Microsoft Teams</li><li>Troubleshoot a connection</li></ul>
+  </article>
+  <article class="card topic" data-keywords="troubleshooting missing monitoring data noisy alerts connection permissions delayed metrics">
+    <span class="tag">Troubleshoot</span><h2>Resolve common problems</h2>
+    <p>Diagnose missing data, noisy alerts, integration failures, and permissions.</p>
+    <ul><li><a href="../docs/troubleshooting/monitoring-data-does-not-appear.md">Monitoring data does not appear</a></li><li><a href="../docs/troubleshooting/alerts-are-too-noisy.md">Alerts are too noisy</a></li></ul>
+  </article>
+</div>
+
+<section class="section"><h2>Browse by role</h2><div class="paths">
+  <div class="role"><h3>Developer or application owner</h3><p>Add services, review health, investigate dependencies, and configure service alerts.</p></div>
+  <div class="role"><h3>Platform or enablement engineer</h3><p>Standardize onboarding, configure shared integrations, and automate through the API.</p></div>
+  <div class="role"><h3>Operations or production support</h3><p>Review active issues, investigate incidents, and coordinate response.</p></div>
+  <div class="role"><h3>Administrator</h3><p>Manage access, shared settings, API credentials, retention, and system integrations.</p></div>
+</div></section>
+
+<section class="section"><h2>Browse by product area</h2>
+<p>Overview · Services · Service details · Alerts · Incidents · Integrations · Settings · API documentation</p>
+</section>
+
+<div class="note"><b>Internal assessment note:</b> This Help Center is based on the illustrative Project Sentinel prototype. Navigation, permissions, field names, and system behavior require validation against the actual product before publication.</div>
+</main>
+<script>
+const search=document.getElementById('search');const topics=[...document.querySelectorAll('.topic')];
+search.addEventListener('input',()=>{const q=search.value.toLowerCase().trim();topics.forEach(t=>t.style.display=(!q||t.textContent.toLowerCase().includes(q)||t.dataset.keywords.includes(q))?'':'none')});
+</script>
+</body></html>
